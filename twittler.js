@@ -1,28 +1,23 @@
 $(document).ready(function(){
+  var autoFeedToggle = true;
   initialize();
   var previousIndex;
+  var specifiedTweeter;
+  var userSpecifiedPreviousIndex = {};
 
   function initialize(){
-    var $body = $('body');
-    $body.html('');
-    $(document).off('click');
-    $('<h1>Twittler</h1>').appendTo($body);
-    $('<div class="newTweet"></div>').appendTo($body)
-    $('<button>Update Feed</button>').appendTo('.newTweet');
-    $('<ul></ul>').appendTo($body);
+    setUpDOM();
     var index = streams.home.length - 1;
     previousIndex = index;
     for (var i = 0; i < index; i++) {
       listTweet(i, 'home');
     }
 
-    $('.newTweet').on('click', 'button', getNewTweet);
-
-    $('ul').on('click', 'a', function() {
+    $('ul').on('click', 'a', function(event) {
+      event.preventDefault();
+      event.stopPropagation();
       var tweeter = $(this).text();
-      console.log(streams.users[tweeter]);
-      console.log(JSON.stringify(streams.users[tweeter]));
-      console.log(streams.users[tweeter].length);
+      specifiedTweeter = tweeter;
       userList(tweeter);
     });
     updateUI();
@@ -30,39 +25,95 @@ $(document).ready(function(){
   }
 
   function autoUpdate(){
-    if (streams.home.length !== previousIndex){
-      getNewTweet();
+    console.log(autoFeedToggle)
+    if (autoFeedToggle) {
+      if (streams.home.length !== previousIndex && specifiedTweeter === undefined){
+        getNewTweet();
+      } else if (specifiedTweeter) {
+        getNewTweet(specifiedTweeter);
+      }
+      setTimeout(autoUpdate, 1000);
     }
-    setTimeout(autoUpdate, 1000);
   }
 
   function userList(tweeter){
+    setUpDOM(tweeter);
+    var index = streams.users[tweeter].length - 1;
+    userSpecifiedPreviousIndex[tweeter] = index;
+    for (var i = 0; i < index; i++) {
+      listTweet(i, 'users', tweeter);
+    }
+    updateUI();
+  }
+
+  function setUpDOM(tweeter){
     var $body = $('body');
     $body.html('');
     $(document).off('click');
-    $('<h1>Twittler</h1>').appendTo($body);
+    if (tweeter === undefined) {
+      $('<h1>Twittler</h1>').appendTo($body);
+    } else {
+      $('<h1>Twittler @' + tweeter + '</h1>').appendTo($body);
+    }
     $('<div class="newTweet"></div>').appendTo($body)
     $('<button>Update Feed</button>').appendTo('.newTweet');
-    $('<div class="goBack"></div>').appendTo($body)
-    $('<button>Go back</button>').appendTo('.goBack');
+
+    $('.newTweet').on('click', 'button', function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      getNewTweet(tweeter);
+    });
+
+    $('<div class="autoFeedToggle"></div>').appendTo($body)
+    $('<button><span>Feed Update : ON</span></button>').appendTo('.autoFeedToggle');
+    $('.autoFeedToggle').on('click', 'button', function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      if (autoFeedToggle) {
+        autoFeedToggle = false;
+        $('.autoFeedToggle span').text('Feed Update: OFF');
+      } else {
+        autoFeedToggle = true;
+        $('.autoFeedToggle span').text('Feed Update : ON');
+        autoUpdate();
+      }
+    });
+
+    if(tweeter !== undefined){
+      $('<div class="goBack"></div>').appendTo($body);
+      $('<button>Go back</button>').appendTo('.goBack');
+      $('.goBack').on('click', 'button', function(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        specifiedTweeter = undefined;
+        initialize();
+      });
+    }
     $('<ul></ul>').appendTo($body);
-    $('.goBack').on('click', 'button', initialize);
-    // for (var i = streams.users[tweeter].length - 1; i >= 0; i--) {
-    //   console.log(i)
-    //   listTweet(i, 'users', tweeter);
-    // }
   }
 
-  function getNewTweet(){
-    var index = streams.home.length - 1;
-    var previous = previousIndex;
-    previousIndex = index;
+  function getNewTweet(tweeter){
+    var index;
+    var previous;
+    if (tweeter === undefined) {
+      index = streams.home.length - 1;
+      previous = previousIndex;
+      previousIndex = index;
+      iterateThroughTweets(index, previous, 'home');
+    } else {
+      index = streams.users[tweeter].length - 1;
+      previous = userSpecifiedPreviousIndex[tweeter];
+      userSpecifiedPreviousIndex[tweeter] = index;
+      iterateThroughTweets(index, previous, 'users', tweeter);
+    }
+  }
+
+  function iterateThroughTweets(index, previous, homeOrUsers, tweeter){
     while(index > previous){
-      listTweet(index, 'home');
+      listTweet(index, homeOrUsers, tweeter);
       index -=1;
       updateUI();
     }
-
   }
 
   function listTweet(index, homeOrUsers, tweeter){
@@ -70,14 +121,13 @@ $(document).ready(function(){
     var timeStamp
     var tweet;
     if (homeOrUsers === 'home'){
-      tweet = streams[homeOrUsers][index];
+      tweet = streams.home[index];
       $tweet.text(tweet.user);
-      timeStamp = getTimeStamp(tweet)
-    } else {
-      tweet = streams[homeOrUsers][tweeter][index];
+    } else if (homeOrUsers === 'users') {
+      tweet = streams.users[tweeter][index];
       $tweet.text(tweeter);
-      timeStamp = getTimeStamp(tweeter);
     }
+    timeStamp = getTimeStamp(tweet);
     $tweet.contents().wrap('<a class="tweeter" href="#"></a>');
 
     var before = timeStamp + ' @';

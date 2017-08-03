@@ -1,13 +1,14 @@
 body {
   display: block;
-  margin: 100px auto 0 auto;
+  margin: 100px auto 100px auto;
   padding: 0 auto 0 auto;
   width: 700px
 }
 
 h1 {
-  width: 100px;
+  width: 500px;
   margin: 0 auto 10px auto;
+  text-align: center;
 }
 
 ul {
