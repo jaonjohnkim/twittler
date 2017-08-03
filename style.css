@@ -1,0 +1,30 @@
+body {
+  display: block;
+  margin: 100px auto 0 auto;
+  padding: 0 auto 0 auto;
+  width: 700px
+}
+
+h1 {
+  width: 100px;
+  margin: 0 auto 10px auto;
+}
+
+ul {
+  margin: 10px auto 10px auto;
+  padding: 10px;
+  border: 1px solid;
+  border-color: rgba(0, 0, 0, 0.2);
+  border-radius: 5px;
+}
+
+button {
+  display: block;
+  margin: 0 auto 20px 20px;
+}
+
+li {
+  display: block;
+  margin: 0px 20px 0px 20px;
+  padding: 5px;
+}
