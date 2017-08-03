@@ -63,7 +63,7 @@ $(document).ready(function(){
       event.stopPropagation();
       getNewTweet(tweeter);
     });
-
+    autoFeedToggle = true;
     $('<div class="autoFeedToggle"></div>').appendTo($body)
     $('<button><span>Feed Update : ON</span></button>').appendTo('.autoFeedToggle');
     $('.autoFeedToggle').on('click', 'button', function (event) {
