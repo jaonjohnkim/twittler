@@ -29,3 +29,7 @@ li {
   margin: 0px 20px 0px 20px;
   padding: 5px;
 }
+
+.hidden {
+  display: none;
+}
