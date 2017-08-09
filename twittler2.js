@@ -16,7 +16,7 @@ $(document).ready(function(){
     listAllTweets();
     addEventListeners();
     autoUpdateFeed();
-
+    autoUpdateTimeStamp();
   }
 
   function setUpDOM (user) {
@@ -105,12 +105,10 @@ $(document).ready(function(){
 
         var usernameLink = $('<a />').attr({class : 'tweeter', href : '#'}).html(username);
         var formattedTime = formatTimeStamp(timeStamp);
-        var humanTime = $('<span />').attr('id', 'humanTime').html('[' + formattedTime[1] + '] @');
-        var dateData = $('<span />').attr({id : 'dateData', class : 'hidden'}).html(timeStamp);
-        var time = humanTime.prepend(dateData);
+        var humanTime = $('<span />').attr('id', 'humanTime').data('dateData', timeStamp).html('[' + formattedTime[0] + '] @');
         message = ': ' + message;
 
-        return [time, usernameLink, message];
+        return [humanTime, usernameLink, message];
 
       }
 
@@ -217,6 +215,28 @@ $(document).ready(function(){
     }
     return 'home';
   }
+
+  function autoUpdateTimeStamp() {
+    updateTimeStamp();
+    setTimeout(autoUpdateTimeStamp, 1000);
+  }
+
+    function updateTimeStamp () {
+      
+      var timeStamps = $('ul li #humanTime');
+
+      _.map(timeStamps, function (span) {
+        var date = $(span);
+        var dateData = date.data('dateData')
+        var humanTime = formatTimeStamp(dateData);
+        var newTime = '[' + humanTime[0] + '] @';
+        if (date.text() !== newTime) {
+          $(span).fadeOut(500, function() {
+            $(this).html(newTime).fadeIn(500);
+          });
+        }
+      });
+    }
 
   function updateUI(){
     $('li').fadeIn();
