@@ -241,9 +241,8 @@ $(document).ready(function(){
   }
 
   function autoUpdateFeed () {
-    updateFeed();
-
     if (globalVariables.autoUpdateToggle === true) {
+      updateFeed();
       setTimeout(function () {
         autoUpdateFeed();
       }, 1000);
