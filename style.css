@@ -33,3 +33,20 @@ li {
 .hidden {
   display: none;
 }
+
+.userInput #charCounter {
+  font-size: 80%;
+  margin-left: 20px;
+}
+
+.userInput #userTweet {
+  display: inline-block;
+  width: 540px;
+  margin-left: 20px
+}
+
+.userInput > button {
+  display: inline-block;
+  float: right;
+  width: 100px;
+}

@@ -8,6 +8,8 @@ $(document).ready(function(){
     'flip' : true,
     previousLengths : {}
   }
+  //Add an account for me!
+  streams.users.me =[];
   initialize();
 
   function initialize () {
@@ -31,9 +33,14 @@ $(document).ready(function(){
     $('<div class="autoFeedToggle"></div>').appendTo($body)
     $('<button><span>Feed Update : ON</span></button>').appendTo('.autoFeedToggle');
 
-    // if user specified, then run setUpDOMForUser
+    // if user specified, then run setUpDOMForUser, if not add user input text bar
     if (globalVariables.selectedUser) {
       setUpDOMForUser(globalVariables.selectedUser);
+      if (globalVariables.selectedUser === 'me') {
+        setUpUserInputBar();
+      }
+    } else {
+      setUpUserInputBar();
     }
 
     // add ul for the tweets to be prepended to
@@ -46,6 +53,15 @@ $(document).ready(function(){
 
       //Append the go Back Button
       $('<div id="goBack"><button>Go back</button></div>').appendTo($body);
+    }
+
+    function setUpUserInputBar () {
+      // add user input bar and tweet button
+      $('<div class="userInput">').appendTo($body);
+      $('<input type="text" id="userTweet" placeholder="Write your tweet here! Max length is 140" maxlength ="140" autofocus>').appendTo('.userInput');
+      $('<button id="post">Post Tweet</button>').appendTo('.userInput');
+      $('<div id="charCounter">Character count: 0</div>').appendTo('.userInput');
+      $('#userTweet').focus();
     }
 
   function listAllTweets () {
@@ -143,6 +159,20 @@ $(document).ready(function(){
       toggleAutoFeed();
     });
 
+    //User tweet
+    $('.userInput').on('click', 'button', function (event) {
+      defaultEventSettings(event);
+      postInputTweet();
+    });
+
+    //Character count as user types
+    $('.userInput').on('keyup', function (event) {
+      countCharacters();
+      if (event.which === 13 || event.keyCode === 13) {
+        postInputTweet();
+      }
+    });
+
     //Username Click
     $('ul').on('click', 'a', function(event) {
       defaultEventSettings(event);
@@ -161,6 +191,27 @@ $(document).ready(function(){
     function defaultEventSettings(event) {
       event.preventDefault();
       event.stopPropagation();
+    }
+  }
+
+  function countCharacters () {
+    var messageLength = $('#userTweet').val().length;
+    $('#charCounter').text('Character count: ' + messageLength);
+  }
+
+  function postInputTweet () {
+    var tweet = {};
+    var message = $('#userTweet').val();
+    if (message.length !== 0) {
+      tweet.message = message;
+      tweet.user = 'me';
+      tweet.created_at = new Date();
+      $('#userTweet').val('');
+      addTweet(tweet);
+      updateFeed();
+      countCharacters();
+    } else {
+      alert('Please write something in the tweet box!');
     }
   }
 
@@ -222,7 +273,7 @@ $(document).ready(function(){
   }
 
     function updateTimeStamp () {
-      
+
       var timeStamps = $('ul li #humanTime');
 
       _.map(timeStamps, function (span) {
